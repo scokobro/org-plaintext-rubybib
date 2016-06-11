@@ -27,5 +27,13 @@ Make sure you replace the dummy path-name in the following line ...
 
 ... with the path to your bibliography file.
 
-Then place the cursor somewhere between the two and hit `C-c C-c`. Unless you've already change your settinsg otherwise you will be asked to give permission for the code-block to run, if you're happy that it's not doing anything naughty (it certainly shouldn't!) then hit 'y' and within a second or two a new drawer names `RESULTS` should appera after the `#+RESULTS: create-bibliography` line.
+Then place the cursor somewhere in the code-block and hit `C-c C-c`. Unless you've already change your settings otherwise you will be asked to give permission for the code-block to run, if you're happy that it's not doing anything naughty (it certainly shouldn't be!) then hit 'y' and within a second or two a new drawer names `RESULTS` should appear after the `#+RESULTS: create-bibliography` line, and it should be filled with your reference list.
+
+# Finding citations
+
+The script is set up to bibtex keys in the text of the file that contains it; my bibtex keys all follows the same basic pattern: |SOME LETTERS(maybe a 'dash' somewhere in there too)|A COLON|FOUR NUMBERS|MAYBE AN EXTRA LETTER|, and the regex in the line...
+
+`res = content.scan(/[a-zA-Z\-]*:[0-9]{4}[a|b|c]?/)#collect regex matches`
+
+... is set up to match this. You may have a different schema for your bibtex keys, in which case you'll have to change the regex to match.
 
