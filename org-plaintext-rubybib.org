@@ -3,7 +3,7 @@
 #+TITLE: Paper Title
 
 * Introduction
-Text goes here, as per normal prose writing in org-mode. Citations can be delimited by spaces or other non-word/non-digit characters, like this KB:2012, or they can look like pandoc citations, like this @Sugimoto:1975. In fact as long as you can adapt the regex to your needs (KB:2012) pretty much anything goes. This script does not produce formatted in-text citations(Thompson:1998). So the 'page number' argument in LaTex-liek citation macros, like this --- \citep[22]{Villi:2015} --- is ignored. References that include double-byte characters (I work a lot with Japanese-language materials), for instance, Yuasa:2006seem to work fine.
+Text goes here, as per normal prose writing in org-mode. Citations can be delimited by spaces or other non-word/non-digit characters, like this KB:2012, or they can look like pandoc citations, like this @Sugimoto:1975. In fact as long as you can adapt the regex to your needs (KB:2012) pretty much anything goes. This script does not produce formatted in-text citations(Thompson:1998). So the 'page number' argument in LaTex-liek citation macros, like this --- \citep[22]{Villi:2015} --- is ignored. References that include double-byte characters (I work a lot with Japanese-language materials), for instance, Yuasa:2006 seem to work fine.
 
 #+NAME: create-bibliography
 #+BEGIN_SRC ruby :results output replace drawer :var file=(buffer-file-name) :exports results
@@ -11,21 +11,25 @@ Text goes here, as per normal prose writing in org-mode. Citations can be delimi
 require 'citeproc'
 require 'csl/styles'
 require 'bibtex'
+
+# choose a CSL style and an output format (see citeproc-ruby docs for details)
 cp = CiteProc::Processor.new style: 'apa', format: 'html'
-cp.import BibTeX.open('/Users/spkb/Documents/Bibliographies/mybib.bib').to_citeproc
+
+# replace the path below with the path to your bibtex file
+cp.import BibTeX.open('/path/to/your/bibliography.bib').to_citeproc
+
 myFile = open(file)#open file from (buffer-file-name)
 content = File.read(myFile, :encoding => 'utf-8')#read it into 'content'
-res = ''#reset citation list
+res = '' #reset citation list
 res = content.scan(/[a-zA-Z\-]*:[0-9][0-9][0-9][0-9][a|b|c]?/)#collect regex matches
-res.uniq!#uniquify
-citAr = res.sort#sort entries
-print "* Bibliography\n\n"
-citAr.each do |it|
-    bibl = cp.render :bibliography, id: it
+res.uniq!# make sure all entries are unique
+citAr = res.sort# alphabetic sort entries
+print "* Bibliography\n\n" #this is the title of the bibliography
+citAr.each do |item|
+    bibl = cp.render :bibliography, id: item #this is the clever stuff!
     out = bibl[0].to_s #for printing without brackets!
-    out.gsub!(/<\/?i>/,'/')#replace html with org markdown
+    out.gsub!(/<\/?i>/,'/')#replace html tag with org markdown for italics
     out.gsub!(/[\{\}]/,'')#get rid of brackets
-    out.gsub!(/\\cjk/,'')#get rid of cjk macro
     out.gsub!('&amp;','&')#replace html entity with & char
     out.gsub!('``','"')#replace latex style open double quotes
     out.gsub!("''",'"') #replace latex style close double quotes
