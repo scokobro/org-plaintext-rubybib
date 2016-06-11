@@ -7,6 +7,8 @@ This is a short org-babel/ruby script (actually a code-block) that scans through
 * Ruby
 * the [citeproc-ruby](https://github.com/inukshuk/citeproc-ruby) gem and its dependencies ([bibtex-ruby](https://github.com/inukshuk/bibtex-ruby))
 
+For more info on code blocks in org [look here](http://orgmode.org/org.html#Working-with-source-code)!
+
 ## Also...
 
 * a [Bibtex](http://www.bibtex.org) bibliography database of your own
