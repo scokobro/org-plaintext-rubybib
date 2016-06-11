@@ -1,0 +1,50 @@
+#+OPTIONS: toc:nil 
+#+AUTHOR: Author Name
+#+TITLE: Paper Title
+
+* Introduction
+Text goes here, as per normal prose writing in org-mode. Citations can be delimited by spaces or other non-word/non-digit characters, like this KB:2012, or they can look like pandoc citations, like this @Sugimoto:1975. In fact as long as you can adapt the regex to your needs (KB:2012) pretty much anything goes. This script does not produce formatted in-text citations(Thompson:1998). So the 'page number' argument in LaTex-liek citation macros, like this --- \citep[22]{Villi:2015} --- is ignored. References that include double-byte characters (I work a lot with Japanese-language materials), for instance, Yuasa:2006seem to work fine.
+
+#+NAME: create-bibliography
+#+BEGIN_SRC ruby :results output replace drawer :var file=(buffer-file-name) :exports results
+# coding: UTF-8
+require 'citeproc'
+require 'csl/styles'
+require 'bibtex'
+cp = CiteProc::Processor.new style: 'apa', format: 'html'
+cp.import BibTeX.open('/Users/spkb/Documents/Bibliographies/mybib.bib').to_citeproc
+myFile = open(file)#open file from (buffer-file-name)
+content = File.read(myFile, :encoding => 'utf-8')#read it into 'content'
+res = ''#reset citation list
+res = content.scan(/[a-zA-Z\-]*:[0-9][0-9][0-9][0-9][a|b|c]?/)#collect regex matches
+res.uniq!#uniquify
+citAr = res.sort#sort entries
+print "* Bibliography\n\n"
+citAr.each do |it|
+    bibl = cp.render :bibliography, id: it
+    out = bibl[0].to_s #for printing without brackets!
+    out.gsub!(/<\/?i>/,'/')#replace html with org markdown
+    out.gsub!(/[\{\}]/,'')#get rid of brackets
+    out.gsub!(/\\cjk/,'')#get rid of cjk macro
+    out.gsub!('&amp;','&')#replace html entity with & char
+    out.gsub!('``','"')#replace latex style open double quotes
+    out.gsub!("''",'"') #replace latex style close double quotes
+print out + "\n\n"
+end
+#+END_SRC
+
+#+RESULTS: create-bibliography
+:RESULTS:
+* Bibliography
+
+Koga-Browes, S. P. (2012). At the Digital Watershed: Terrestrial Television Broadcasting in Japan. /Japanese Studies/, /32/(3), 445–468. http://doi.org/10.1080/10371397.2012.730482
+
+Sugimoto, M., Ogusu, C., Ikegami, H., & Yoshida, H. (1975). Electronic News-Gathering System. /Broadcasting, IEEE Transactions On/, /BC-21/(1), 15–24. http://doi.org/10.1109/TBC.1975.266158
+
+Thompson, R. (1998). /Grammar of the Shot/. Oxford: Focal Press.
+
+Villi, M., & Hayashi, K. (2015). "The Mission is to Keep this Industry Intact" Digital transition in the Japanese newspaper industry. /Journalism Studies/, 1–18. http://doi.org/10.1080/1461670X.2015.1110499
+
+Yuasa, M., Shukunami, T., Azami, T., Ito, T., & Uchiyama, T. (2006). /Media-sangyōron (Media Industry Theory) メディア産業論/. Tokyo: Yuhikaku Compact.
+
+:END:
